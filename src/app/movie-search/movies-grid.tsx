@@ -1,16 +1,19 @@
-import { Alert, CircularProgress, Pagination } from '@mui/material';
+import {
+  Alert,
+  CircularProgress,
+  Pagination,
+  Stack,
+  Typography,
+  Box,
+  Button,
+} from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
-import { useCallback } from 'react';
-import styled from 'styled-components';
 import { Link } from 'react-router-dom';
-
 import { fetchMovies } from './fetch-movies';
+import { useCallback } from 'react';
 
-type Props = {
-  page: number;
-  query: string;
-  setPage: (page: number) => void;
-};
+type Props = { page: number; query: string; setPage: (page: number) => void };
+
 export const MoviesGrid = ({ page, query, setPage }: Props) => {
   const handlePageChange = useCallback(
     (_: unknown, newPage: number) => {
@@ -19,141 +22,163 @@ export const MoviesGrid = ({ page, query, setPage }: Props) => {
     [setPage]
   );
 
-  const { error, data, isLoading } = useQuery({
+  const { error, data, isLoading, refetch } = useQuery({
     queryKey: ['movies', { page, query }],
     queryFn: fetchMovies,
+    enabled: !!query,
   });
 
   if (error) {
     return (
-      <Alert severity="error" data-testid="error-message">
-        {(error as Error).message}
-      </Alert>
+      <Stack alignItems="center" mt={4}>
+        <Alert
+          severity="error"
+          sx={{
+            width: '100%',
+            maxWidth: '600px',
+            bgcolor: 'rgba(211, 47, 47, 0.1)',
+            color: '#ff8a80',
+            alignItems: 'center',
+          }}
+          action={
+            <Button
+              size="small"
+              onClick={() => refetch()}
+              variant="contained"
+              sx={{
+                backgroundColor: '#ed6c02',
+                color: '#1a1a2e',
+                fontWeight: '700',
+                textTransform: 'uppercase',
+                borderRadius: '6px',
+                '&:hover': { backgroundColor: '#ff8a29' },
+              }}
+            >
+              Try Again
+            </Button>
+          }
+        >
+          {(error as Error).message}
+        </Alert>
+      </Stack>
     );
   }
 
-  if (isLoading || !data) {
-    return <CircularProgress />;
+  if (!query) {
+    return null;
   }
+
+  if (isLoading || !data)
+    return (
+      <CircularProgress
+        sx={{ color: '#ff9800', display: 'block', mx: 'auto', mt: 4 }}
+      />
+    );
 
   const { results, total_pages } = data;
 
   return (
-    <Container data-testid="movie-grid">
-      <MoviesContainer>
+    <Stack
+      alignItems="center"
+      width="100%"
+      spacing={4}
+      data-testid="movie-grid"
+    >
+      <Stack
+        direction="row"
+        flexWrap="wrap"
+        justifyContent="center"
+        gap={3}
+        width="100%"
+        sx={{
+          minHeight: '400px',
+          alignItems: results.length === 0 ? 'center' : 'flex-start',
+        }}
+      >
         {results.length === 0 && query !== '' && (
-          <EmptyState>No movies found</EmptyState>
+          <Typography color="white" variant="h6">
+            No movies found
+          </Typography>
         )}
+
         {results.map(({ id, poster_path, release_date, title }) => (
-          <DetailLink to={`/movies/${id}`} key={id}>
-            <Item>
-              {poster_path ? (
-                <MovieImage
-                  alt={title}
-                  src={`https://image.tmdb.org/t/p/w500${poster_path}`}
-                />
-              ) : (
-                <ImagePlaceholder>No image available</ImagePlaceholder>
-              )}
-              <div>
-                <MovieTitle title={title}>{title}</MovieTitle>
-                <MovieDate>
-                  {release_date ? new Date(release_date).getFullYear() : 'TBA'}
-                </MovieDate>
-              </div>
-            </Item>
-          </DetailLink>
+          <Stack
+            key={id}
+            component={Link}
+            to={`/movies/${id}`}
+            sx={{
+              textDecoration: 'none',
+              mt: 3,
+              width: { xs: '100%', sm: '45%', md: '30%', lg: '18%', xl: '15%' },
+            }}
+          >
+            {poster_path ? (
+              <Box
+                component="img"
+                src={`https://image.tmdb.org/t/p/w500${poster_path}`}
+                alt={title}
+                sx={{
+                  aspectRatio: '2/3',
+                  objectFit: 'cover',
+                  borderRadius: 2,
+                  transition: '0.3s',
+                  '&:hover': {
+                    transform: 'scale(1.05)',
+                  },
+                }}
+              />
+            ) : (
+              <Stack
+                justifyContent="center"
+                alignItems="center"
+                sx={{
+                  width: '100%',
+                  aspectRatio: '2/3',
+                  borderRadius: 2,
+                  bgcolor: '#3a3a5a',
+                  color: 'rgba(255, 255, 255, 0.5)',
+                  transition: '0.3s',
+                  '&:hover': {
+                    transform: 'scale(1.03)',
+                  },
+                }}
+              >
+                <Typography variant="body2">No image available</Typography>
+              </Stack>
+            )}
+            <Typography
+              variant="body2"
+              sx={{
+                color: '#fff',
+                mt: 2,
+                fontWeight: 'bold',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                textAlign: 'center',
+              }}
+            >
+              {title}
+            </Typography>
+            <Typography
+              variant="caption"
+              sx={{ color: '#888', textAlign: 'center' }}
+            >
+              {release_date ? new Date(release_date).getFullYear() : 'TBA'}
+            </Typography>
+          </Stack>
         ))}
-      </MoviesContainer>
+      </Stack>
+
       {total_pages > 1 && (
         <Pagination
           color="warning"
           count={total_pages}
-          onChange={handlePageChange}
           page={page}
-          showFirstButton
-          showLastButton
-          sx={{
-            '& .MuiPaginationItem-root': {
-              color: 'white',
-            },
-          }}
+          onChange={handlePageChange}
+          sx={{ '& .MuiPaginationItem-root': { color: 'white' } }}
         />
       )}
-    </Container>
+    </Stack>
   );
 };
-
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: 20px 0;
-`;
-
-const MoviesContainer = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-`;
-
-const EmptyState = styled.div`
-  color: white;
-`;
-
-const DetailLink = styled(Link)`
-  text-decoration: none;
-`;
-
-const Item = styled.div`
-  display: flex;
-  flex-direction: column;
-  width: 250px;
-  padding: 30px;
-`;
-
-const MovieImage = styled.img`
-  height: 350px;
-  object-fit: contain;
-  background-color: black;
-  padding: 10px;
-  border-radius: 10px;
-
-  &:hover {
-    outline: 1px solid #ed6c02;
-  }
-`;
-
-const ImagePlaceholder = styled.div`
-  width: 250px;
-  height: 370px;
-  background-color: black;
-  color: white;
-  line-height: 350px;
-  text-align: center;
-  text-transform: uppercase;
-  border-radius: 10px;
-
-  &:hover {
-    outline: 1px solid #ed6c02;
-  }
-`;
-
-const MovieTitle = styled.div`
-  font-size: 12px;
-  color: #fff;
-  margin-top: 10px;
-  text-align: center;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  font-weight: bold;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-`;
-
-const MovieDate = styled.div`
-  color: grey;
-  text-align: center;
-  margin-top: 10px;
-`;

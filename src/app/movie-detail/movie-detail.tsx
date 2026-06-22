@@ -1,9 +1,7 @@
-import { Alert, Button } from '@mui/material';
+import { Alert, Button, Stack, Box, Container } from '@mui/material';
 import { useCallback } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
-
 import { MovieDetailContent } from './movie-detail-content';
 
 export const MovieDetail = () => {
@@ -14,35 +12,46 @@ export const MovieDetail = () => {
   }, [navigate]);
 
   return (
-    <Container>
-      <BackButton
-        color="warning"
-        onClick={handleGoBackButton}
-        variant="contained"
-      >
-        Back to results
-      </BackButton>
-      <ErrorBoundary
-        fallback={
-          <Alert severity="error">
-            We could not complete your request. Please try again.
-          </Alert>
-        }
-      >
-        <MovieDetailContent />
-      </ErrorBoundary>
-    </Container>
+    <Stack pt={{ xs: 4, md: 8 }}>
+      <Container maxWidth="xl">
+        <Stack spacing={4}>
+          <Box>
+            <Button
+              onClick={handleGoBackButton}
+              variant="contained"
+              disableElevation
+              sx={{
+                borderRadius: '8px',
+                backgroundColor: '#ed6c02',
+                color: '#1a1a2e',
+                fontWeight: '700',
+                textTransform: 'uppercase',
+                letterSpacing: '1px',
+                px: 3,
+                py: 1,
+                '&:hover': {
+                  backgroundColor: '#ff8a29',
+                },
+              }}
+            >
+              Back to results
+            </Button>
+          </Box>
+
+          <ErrorBoundary
+            fallback={
+              <Alert
+                severity="error"
+                sx={{ bgcolor: 'rgba(211, 47, 47, 0.1)', color: '#ff8a80' }}
+              >
+                We could not complete your request. Please try again.
+              </Alert>
+            }
+          >
+            <MovieDetailContent />
+          </ErrorBoundary>
+        </Stack>
+      </Container>
+    </Stack>
   );
 };
-
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  padding: 20px;
-  background-color: #263444;
-`;
-
-const BackButton = styled(Button)`
-  width: 200px;
-  margin-bottom: 20px;
-`;
