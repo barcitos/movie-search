@@ -28,7 +28,7 @@ export const App = () => (
         html: { scrollbarWidth: 'none' },
       }}
     />
-    <BrowserRouter>
+    <BrowserRouter basename="/movie-night">
       <Routes>
         <Route element={<Layout />}>
           <Route index element={<Navigate to="movies" />} />

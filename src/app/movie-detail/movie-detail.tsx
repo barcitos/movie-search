@@ -8,7 +8,7 @@ export const MovieDetail = () => {
   const navigate = useNavigate();
 
   const handleGoBackButton = useCallback(() => {
-    navigate(-1);
+    navigate('/movies');
   }, [navigate]);
 
   return (

@@ -1,7 +1,7 @@
 import { Box, Link, Stack, Typography } from '@mui/material';
 import { Outlet } from 'react-router-dom';
 import GitHubIcon from '@mui/icons-material/GitHub';
-import tmdbLogo from '../assets/logo.svg';
+import tmdbLogo from '../../public/tmdb.svg';
 
 export const Layout = () => {
   const technologies = ['React', 'Material UI', 'TanStack Query'];
