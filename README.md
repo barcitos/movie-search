@@ -22,3 +22,5 @@ A movie discovery application for searching and browsing films via the TMDb API,
 3. **Run test suites:**
    ```bash
    yarn test
+
+Live demo: https://barca.slarka.com/movie-night   
